@@ -1,0 +1,57 @@
+version: '3'
+services:
+  zoo:
+    image: zookeeper
+    restart: always
+    ports:
+      - 2181:2181
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181
+#    volumes:
+#      - /opt/docker-volumes/test-kafka-container/zoo1/data:/data
+#      - /opt/docker-volumes/test-kafka-container/zoo1/datalog:/datalog
+  kafka:
+    build:
+      context: ./
+      dockerfile: Dockerfile_kafka
+    restart: always
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zoo:2181
+      BROKER_COMMAND: "host $$(awk 'END{print $$1}' /etc/hosts) | rev | cut -d' ' -f1 | rev | cut -d'.' -f1 | rev | cut -d'_' -f1 | rev"
+      HOSTNAME_COMMAND: "awk 'END{print $$1}' /etc/hosts"
+      PORT_COMMAND: "expr 9092 + $$(host $$(awk 'END{print $$1}' /etc/hosts) | rev | cut -d' ' -f1 | rev | cut -d'.' -f1 | rev | cut -d'_' -f1 | rev)"
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://_{HOSTNAME_COMMAND}:19092,OUTSIDE://127.0.0.1:_{PORT_COMMAND}
+      KAFKA_LISTENERS: PLAINTEXT://:19092,OUTSIDE://:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      #TOPIC_NAME:PARTITION:RECPLICATION_FACTOR
+      KAFKA_CREATE_TOPICS: >-
+                           test:5:2,
+                           test2:5:2
+#    volumes:
+#      - /opt/docker-volumes/test-kafka-container/kafka/data:/kafka
+#      - /opt/docker-volumes/test-kafka-container/kafka/config:/opt/kafka/config
+    depends_on:
+      - zoo
+  kafka-router:
+    image: szczurmys/haproxy-kafka-router
+    restart: always
+    ports:
+      - 9092-9102:9092-9102
+    environment:
+      COUNT_FROM: 1
+      MAX_SERVERS: 10
+      KAFKA_MAIN_ADDRESS: kafka:9092
+      KAFKA_TEMPLATE_ADDRESS: testkafkastream_kafka_{0}:9092
+    depends_on:
+      - kafka
+
+#example run command:
+#docker-compose -f docker-compose.yml -p testkafkastream up
+#docker-compose -f docker-compose.yml -p testkafkastream up --scale kafka=10
+
+
+#example test command:
+#kafka-console-producer.sh --broker-list localhost:9092 --topic test
+#kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test --from-beginning
