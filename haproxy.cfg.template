@@ -1,0 +1,30 @@
+global
+    log 127.0.0.1 local0 debug
+    maxconn 5000
+    nbproc ${cpuCount}
+
+defaults
+    log     global
+    mode    tcp
+    option  tcplog
+    timeout connect ${timeoutConnect}
+    timeout server ${timeoutServer}
+    timeout client ${timeoutClient}
+
+
+frontend mainKafkaIn
+    bind *:${baseKafkaPort}
+    default_backend mainKafkaOut
+backend mainKafkaOut
+    server mainKafkaAddress ${kafkaMainAddress} init-addr libc,none no-check
+
+
+% for index in range(countFrom, maxServers + countFrom):
+frontend kafkaIn_${index}
+    bind *:${specificKafkaPort + loop.index}
+    default_backend kafkaOut_${index}
+backend kafkaOut_${index}
+    server kafkaAddress_${index} ${kafkaTemplateAddress.format(index, loop.index)} init-addr libc,none no-check
+
+
+% endfor
