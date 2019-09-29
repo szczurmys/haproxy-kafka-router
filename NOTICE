@@ -1,0 +1,14 @@
+HAProxy Kafka Router
+
+This product includes software developed at
+Licensed under Python Software Foundation License:
+- Python (https://www.python.org/)
+- PyPI (https://www.python.org/)
+- argparse (https://github.com/ThomasWaldmann/argparse)
+
+
+This product includes software developed at
+Licensed under MIT:
+- Mako Templates for Python (https://www.makotemplates.org/)
+- The Python Package Installer (https://pip.pypa.io/en/stable/)
+- pytest (https://docs.pytest.org/en/latest/)
