@@ -48,8 +48,8 @@ services:
       - kafka
 
 #example run command:
-#docker-compose -f docker-compose.yml -p testkafkastream up
-#docker-compose -f docker-compose.yml -p testkafkastream up --scale kafka=10
+#docker-compose -f docker-compose.yaml -p testkafkastream up
+#docker-compose -f docker-compose.yaml -p testkafkastream up --scale kafka=10
 
 
 #example test command:
