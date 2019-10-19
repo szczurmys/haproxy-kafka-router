@@ -12,9 +12,7 @@ services:
 #      - /opt/docker-volumes/test-kafka-container/zoo1/data:/data
 #      - /opt/docker-volumes/test-kafka-container/zoo1/datalog:/datalog
   kafka:
-    build:
-      context: ./
-      dockerfile: Dockerfile_kafka
+    image: szczurmys/wurstmeister-kafka-with-nslookup:2.12-2.0.1
     restart: always
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zoo:2181
